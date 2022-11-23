@@ -1,12 +1,12 @@
 on:
-  pull_request:
+  push:
     branches: [main]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -20,12 +20,17 @@ jobs:
             encx/agoda-ci-workshop-2022:1.0.${{ github.run_id }}-alpha
   test:
     runs-on: ubuntu-latest
+    needs: build
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 16
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-      - run: yarn
-      - run: npx playwright install chromium
-      - run: yarn test:e2e
+      - name: Install project dependencies
+        run: yarn
+      - name: Install test framework
+        run: npx playwright install chromium
+      - name: Run test
+        run: yarn test:e2e
